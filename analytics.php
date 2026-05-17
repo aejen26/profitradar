@@ -466,7 +466,7 @@ echo "<option value='{$p['id']}' $sel>{$p['name']}</option>";
 
 <h5>Return on Investment (ROI)</h5>
 
-<canvas id="roiChart"></canvas>
+<!--<canvas id="roiChart"></canvas>
 
 <div class="text-center mt-3">
 <h4 class="fw-bold <?= $roi >= 0 ? 'text-success' : 'text-danger' ?>">
@@ -478,7 +478,7 @@ echo "<option value='{$p['id']}' $sel>{$p['name']}</option>";
     
 </div>
 </div>  
-<div class="col-md-6"><div class="card p-3">
+<div class="col-md-6"><div class="card p-3">-->
 
 <h5>Product Demand Trend</h5>
 
