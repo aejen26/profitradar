@@ -29,6 +29,7 @@ $whereSql = $where ? 'WHERE '.implode(' AND ', $where) : '';
 $stmt = $pdo->prepare("
 SELECT 
 d.id,
+d.delivery_number,
 d.delivery_date,
 d.status,
 c.name AS customer
@@ -77,14 +78,14 @@ if($r['status']=='delivered') $delivered++;
 </div>
 </div>
 
-<div class="col-md-3">
+<!--<div class="col-md-3">
 <div class="card shadow-sm">
 <div class="card-body">
 <div class="text-muted small">Pending</div>
 <div class="fs-5 text-warning fw-semibold"><?= $pending ?></div>
 </div>
 </div>
-</div>
+</div>-->
 
 <div class="col-md-3">
 <div class="card shadow-sm">
@@ -174,6 +175,7 @@ Filter
 
 <tr>
 <th style="width:80px">#</th>
+<th>Delivery No.</th>
 <th>Customer</th>
 <th style="width:150px">Date</th>
 <th style="width:140px">Status</th>
@@ -202,6 +204,11 @@ No deliveries found.
 <?= $r['id'] ?>
 </td>
 
+<td>
+<span class="badge bg-dark">
+<?= h($r['delivery_number'] ?? '-') ?>
+</span>
+</td>
 
 <td>
 <?= h($r['customer'] ?? 'Walk-in') ?>
@@ -219,9 +226,6 @@ $status = strtolower(trim($r['status'] ?? ''));
 
 switch ($status){
 
-case 'pending':
-echo '<span class="badge bg-warning text-dark">Pending</span>';
-break;
 
 case 'partial':
 echo '<span class="badge bg-info text-dark">Partial</span>';
