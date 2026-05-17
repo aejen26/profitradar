@@ -28,10 +28,22 @@ $p = [
 
 // load existing when editing
 if ($id) {
+
+  // try current user first
   $st = $pdo->prepare('SELECT * FROM products WHERE id=? AND user_id=?');
   $st->execute([$id, $user_id]);
   $row = $st->fetch(PDO::FETCH_ASSOC);
-  if ($row) $p = array_merge($p, $row);
+
+  // fallback for old products
+  if (!$row) {
+    $st = $pdo->prepare('SELECT * FROM products WHERE id=?');
+    $st->execute([$id]);
+    $row = $st->fetch(PDO::FETCH_ASSOC);
+  }
+
+  if ($row) {
+    $p = array_merge($p, $row);
+  }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
