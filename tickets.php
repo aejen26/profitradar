@@ -231,7 +231,6 @@ class="mb-3 small text-muted"></div>
 <th>Item</th>
 <th class="text-end">Qty</th>
 <th class="text-end">Unit</th>
-<th class="text-end">Line</th>
 </tr>
 </thead>
 
@@ -239,7 +238,7 @@ class="mb-3 small text-muted"></div>
 
 <tfoot>
 <tr>
-<th colspan="4" class="text-end">Total</th>
+<th colspan="3" class="text-end">Total</th>
 <th id="ticketPreviewTotal" class="text-end">₱0.00</th>
 </tr>
 </tfoot>
@@ -308,7 +307,6 @@ tr.innerHTML = `
 <td>${escapeHtml(L.name || 'Unnamed')}</td>
 <td class="text-end">${qty}</td>
 <td class="text-end">₱${unit}</td>
-<td class="text-end">₱${lineTotal}</td>
 `;
 
 bodyEl.appendChild(tr);
@@ -338,4 +336,4 @@ m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
 </script>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
