@@ -183,6 +183,34 @@ if ($action === 'save_ticket') {
   header('Location: sale_add.php');
   exit;
 }
+      $clean = [];
+
+foreach ($rawItems as $r) {
+
+    $pid = (int)$r['product_id'];
+
+    if ($pid <= 0 || !isset($pindex[$pid])) {
+        continue;
+    }
+
+    $prod = $pindex[$pid];
+
+    $qty = $prod['sold_by'] === 'weight'
+        ? max(0.25, round($r['qty'] * 4) / 4)
+        : max(1, (int)round($r['qty']));
+
+    $unitPrice = $sale_mode === 'wholesale'
+        ? (float)($prod['wholesale_price'] ?: $prod['sell_price'])
+        : (float)$prod['sell_price'];
+
+    $clean[] = [
+        'product_id' => $pid,
+        'qty' => $qty,
+        'unit_price' => $unitPrice,
+        'discount_type' => $r['discount_type'] ?? null,
+        'discount_value' => $r['discount_value'] ?? null
+    ];
+}
     /* ================= STOCK VALIDATION ================= */
 foreach ($clean as $item) {
 
