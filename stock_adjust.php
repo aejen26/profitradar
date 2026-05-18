@@ -51,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAjax) {
   try {
 
     $items = $_POST['items'] ?? [];
+    $reason = trim($_POST['reason'] ?? 'Stock adjustment');
 
     if (!$items) {
         throw new Exception("No items.");
@@ -87,12 +88,92 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAjax) {
             ':stock'=>$after,
             ':id'=>$pid
         ]);
+        /* create adjustment transaction */
+
+$userId = $_SESSION['user']['id'] ?? 1;
+
+$reason = trim($_POST['reason'] ?? 'Stock adjusted');
+
+/* generate unique adjustment ref */
+$refNo = 'ADJ_' . date('Ymd_His');
+
+$tx = $pdo->prepare("
+INSERT INTO transactions
+(
+    type,
+    ref_no,
+    date,
+    user_id,
+    notes,
+    created_at
+)
+VALUES
+(
+    :type,
+    :ref_no,
+    NOW(),
+    :user_id,
+    :notes,
+    NOW()
+)
+");
+
+$tx->execute([
+    ':type'    => 'adjust',
+    ':ref_no'  => $refNo,
+    ':user_id' => $userId,
+    ':notes'   => $reason
+]);
+
+$transactionId = $pdo->lastInsertId();
+
+
+/* insert adjustment item */
+
+$txItem = $pdo->prepare("
+INSERT INTO transaction_items
+(transaction_id, product_id, qty, unit_price)
+VALUES (?, ?, ?, 0)
+");
+
+$txItem->execute([
+    $transactionId,
+    $pid,
+    $delta
+]);
 
         $applied[]=[
             'product_id'=>$pid,
             'before'=>$before,
             'after'=>$after
         ];
+        /* save audit log */
+
+$auditData = [
+    'type' => 'stock_adjust',
+    'reason' => $reason,
+    'items' => [
+        [
+            'product_id' => $pid,
+            'before' => $before,
+            'delta' => $delta,
+            'after' => $after
+        ]
+    ]
+];
+
+$log = $pdo->prepare("
+INSERT INTO audit_log
+(user_id, action, description, new_data, created_at)
+VALUES (?, ?, ?, ?, NOW())
+");
+
+$log->execute([
+    $userId,
+    'stock_adjust',
+    $reason,
+    json_encode($auditData)
+]);
     }
 
     $pdo->commit();
@@ -241,9 +322,11 @@ font-size:13px;
 <h4 class="page-title">Stock Adjustment</h4>
 
 <div class="filter-bar">
+
 <div class="row g-2">
 
-<div class="col-md-4">
+<div class="col-md-3">
+
 <label class="form-label small">Category</label>
 
 <select id="categorySelect" class="form-select form-select-sm">
@@ -252,14 +335,17 @@ font-size:13px;
 
 <?php foreach($categories as $c): ?>
 
-<option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+<option value="<?= $c['id'] ?>">
+<?= htmlspecialchars($c['name']) ?>
+</option>
 
 <?php endforeach; ?>
 
 </select>
+
 </div>
 
-<div class="col-md-8">
+<div class="col-md-5">
 
 <label class="form-label small">Search Product</label>
 
@@ -271,7 +357,46 @@ placeholder="Search name or code..."
 
 </div>
 
+<div class="col-md-4">
+
+<label class="form-label small">Adjustment Reason</label>
+
+<select id="reasonSelect" class="form-select form-select-sm">
+
+<option value="Recount Correction">
+Recount Correction
+</option>
+
+<option value="Damaged">
+Damaged
+</option>
+
+<option value="Missing">
+Missing
+</option>
+
+<option value="Expired">
+Expired
+</option>
+
+<option value="Supplier Bonus">
+Supplier Bonus
+</option>
+
+<option value="Initial Stock">
+Initial Stock
+</option>
+
+<option value="Other">
+Other
+</option>
+
+</select>
+
 </div>
+
+</div>
+
 </div>
 
 <form id="adjustForm">
@@ -370,6 +495,12 @@ const fd=new FormData();
 
 fd.append('ajax','1');
 fd.append('csrf',document.querySelector('input[name="csrf"]').value);
+const reason =
+document.getElementById('reasonSelect').value || 'Stock adjusted';
+
+fd.append('reason', reason);
+
+console.log('Sending reason:', reason);
 
 items.forEach((q,i)=>{
 
@@ -384,6 +515,7 @@ body:fd
 });
 
 const j=await res.json();
+console.log(j);
 
 if(!res.ok) throw new Error(j.msg);
 
