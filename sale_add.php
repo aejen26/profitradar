@@ -47,10 +47,19 @@ if (isset($_GET['delete_ticket'])) {
 
 /* load ticket */
 $initialTicket = null;
+
 if (isset($_GET['load_ticket'])) {
+
   foreach ($_SESSION['tickets'] as $t) {
-    if ($t['id'] === $_GET['load_ticket']) {
+
+    $tid = $t['id'] ?? '';
+
+    if ($tid === $_GET['load_ticket']) {
+
+      $t['items'] = $t['items'] ?? [];
+
       $initialTicket = $t;
+
       break;
     }
   }
@@ -104,55 +113,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     /* SAVE TICKET */
-    if ($action === 'save_ticket') {
-      $_SESSION['tickets'][] = [
-        'id' => bin2hex(random_bytes(8)),
-        'created_at' => date('c'),
-        'date' => $date,
-        'customer_id' => $customer_id,
-        'sale_mode' => $sale_mode,
-        'notes' => $notes,
-        'inv_discount_type' => $inv_disc_type,
-        'inv_discount_value' => $inv_disc_value,
-        'items' => $rawItems
-      ];
+if ($action === 'save_ticket') {
 
-      $_SESSION['success'] = 'Ticket saved successfully';
-      header('Location: sale_add.php');
-      exit;
+  $ticketItems = [];
+
+  foreach ($rawItems as $r) {
+
+    $pid = (int)$r['product_id'];
+
+    if ($pid <= 0 || !isset($pindex[$pid])) {
+      continue;
     }
 
-    /* BUILD CLEAN SALE ITEMS */
-    $clean = [];
-    foreach ($rawItems as $r) {
-      $pid = (int)$r['product_id'];
-      if ($pid <= 0 || !isset($pindex[$pid])) continue;
+    $prod = $pindex[$pid];
 
-      $prod = $pindex[$pid];
+    $qty = $prod['sold_by'] === 'weight'
+      ? max(0.25, round($r['qty'] * 4) / 4)
+      : max(1, (int)round($r['qty']));
 
-      $qty = $prod['sold_by'] === 'weight'
-        ? max(0.25, round($r['qty'] * 4) / 4)
-        : max(1, (int)round($r['qty']));
+    $unit = $sale_mode === 'wholesale'
+      ? (float)($prod['wholesale_price'] ?: $prod['sell_price'])
+      : (float)$prod['sell_price'];
 
-      $unit = $sale_mode === 'wholesale'
-        ? (float)($prod['wholesale_price'] ?: $prod['sell_price'])
-        : (float)$prod['sell_price'];
+    $ticketItems[] = [
 
-      $clean[] = [
-        'product_id' => $pid,
-        'qty' => $qty,
-        'unit_price' => round($unit, 2),
-        'discount_type' => $r['discount_type'],
-        'discount_value' => $r['discount_value'],
-        'price_tier' => $sale_mode
-      ];
-    }
+      'product_id' => $pid,
 
-    if (!$clean) {
-      $_SESSION['error'] = 'Please add at least one valid item';
-      header('Location: sale_add.php');
-      exit;
-    }
+      'code' => $prod['code'] ?? '',
+
+      'name' => $prod['name'] ?? '',
+
+      'qty' => $qty,
+
+      'unit_price' => round($unit, 2),
+
+      'discount_type' => $r['discount_type'] ?? null,
+
+      'discount_value' => $r['discount_value'] ?? null,
+
+      'price_tier' => $sale_mode
+
+    ];
+  }
+
+  $_SESSION['tickets'][] = [
+
+    'id' => bin2hex(random_bytes(8)),
+
+    'created_at' => date('c'),
+
+    'date' => $date,
+
+    'customer_id' => $customer_id,
+
+    'sale_mode' => $sale_mode,
+
+    'notes' => $notes,
+
+    'inv_discount_type' => $inv_disc_type,
+
+    'inv_discount_value' => $inv_disc_value,
+
+    'items' => $ticketItems
+
+  ];
+
+  $_SESSION['success'] = 'Ticket saved successfully';
+
+  header('Location: sale_add.php');
+  exit;
+}
     /* ================= STOCK VALIDATION ================= */
 foreach ($clean as $item) {
 
