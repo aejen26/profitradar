@@ -38,6 +38,7 @@ $sql = "
     t.type,
     t.ref_no,
     t.date,
+    t.notes,
     t.created_at,
     u.name AS user_name,
     s.name AS supplier_name,
@@ -63,7 +64,16 @@ $sql = "
   LEFT JOIN customers c    ON c.id = t.customer_id
   JOIN transaction_items ti ON ti.transaction_id = t.id
   WHERE $where
-  GROUP BY t.id, t.type, t.ref_no, t.date, t.created_at, u.name, s.name, c.name
+  GROUP BY 
+t.id,
+t.type,
+t.ref_no,
+t.date,
+t.notes,
+t.created_at,
+u.name,
+s.name,
+c.name
   ORDER BY t.date DESC, t.id DESC
 ";
 $st = $pdo->prepare($sql);
@@ -98,160 +108,6 @@ $li->execute($params_tx);
 $itemsByTx = [];
 foreach ($li as $r) { $itemsByTx[$r['transaction_id']][] = $r; }
 
-
-/* ---------------- Include stock_adjust audit_log entries as pseudo-transactions (compatible) ---------------- */
-/* ... (audit_log -> pseudo transaction conversion unchanged) ... */
-
-$auditSql = "SELECT id, user_id, description, new_data, created_at
-             FROM audit_log
-             WHERE 1=1";
-$auditParamsPos = [];
-
-if (!empty($from)) {
-    $auditSql .= " AND created_at >= ?";
-    $auditParamsPos[] = $from . ' 00:00:00';
-}
-if (!empty($to)) {
-    $auditSql .= " AND created_at <= ?";
-    $auditParamsPos[] = $to . ' 23:59:59';
-}
-
-$auditSql .= " AND (
-    LOWER(new_data) LIKE ?
-    OR LOWER(new_data) LIKE ?
-    OR LOWER(description) LIKE ?
-    OR description LIKE ?
-    OR new_data REGEXP ?
-)";
-$auditParamsPos[] = '%"type":"stock_adjust"%';
-$auditParamsPos[] = '%stock_adjust%';
-$auditParamsPos[] = '%adjusted pid%';
-$auditParamsPos[] = '%Adjusted PID%';
-$auditParamsPos[] = 'stock.?adjust';
-
-if ($q !== '') {
-    $auditSql .= " AND (description LIKE ? OR new_data LIKE ?)";
-    $auditParamsPos[] = '%' . $q . '%';
-    $auditParamsPos[] = '%' . $q . '%';
-}
-
-if (!empty($_GET['user_id'])) {
-    $auditSql .= " AND user_id = ?";
-    $auditParamsPos[] = (int)$_GET['user_id'];
-}
-
-$auditSql .= " ORDER BY created_at DESC, id DESC LIMIT 1000";
-
-$ast = $pdo->prepare($auditSql);
-$ast->execute($auditParamsPos);
-$auditRows = $ast->fetchAll(PDO::FETCH_ASSOC);
-
-foreach ($auditRows as $ar) {
-    $aid = (int)$ar['id'];
-    $newDataRaw = $ar['new_data'] ?? null;
-
-    $decoded = null;
-    if ($newDataRaw) {
-        $decoded = @json_decode($newDataRaw, true);
-        if ($decoded === null && is_string($newDataRaw)) {
-            $try = @json_decode(stripslashes($newDataRaw), true);
-            if (is_array($try)) $decoded = $try;
-            else {
-                if (preg_match('/^"(.*)"$/s', $newDataRaw, $m)) {
-                    $try2 = @json_decode(str_replace('\"','"',$m[1]), true);
-                    if (is_array($try2)) $decoded = $try2;
-                }
-            }
-        }
-    }
-
-    $items = [];
-    if (is_array($decoded)) {
-        if (!empty($decoded['items']) && is_array($decoded['items'])) {
-            $items = $decoded['items'];
-        } elseif (!empty($decoded['data']['items']) && is_array($decoded['data']['items'])) {
-            $items = $decoded['data']['items'];
-        } else {
-            foreach ($decoded as $k => $v) {
-                if (is_array($v) && isset($v[0]) && (isset($v[0]['product_id']) || isset($v[0]['delta']))) {
-                    $items = $v;
-                    break;
-                }
-            }
-        }
-    }
-
-    if (empty($items) && !empty($ar['description'])) {
-        $matches = [];
-        preg_match_all('/Adjusted\s+PID\s*(\d+)\s*:\s*before=([0-9.\-]+)\s*,\s*delta=([0-9.\-]+)\s*,\s*after=([0-9.\-]+)/i', $ar['description'], $matches, PREG_SET_ORDER);
-        foreach ($matches as $m) {
-            $items[] = [
-                'product_id' => (int)$m[1],
-                'before' => (float)$m[2],
-                'delta' => (float)$m[3],
-                'after' => (float)$m[4],
-            ];
-        }
-    }
-
-    if (empty($items)) continue;
-
-    $qty_total = 0.0;
-    foreach ($items as $it) $qty_total += (float)($it['delta'] ?? 0);
-
-    $pseudoId = 'adj' . $aid;
-    $row = [
-        'id' => $pseudoId,
-        'type' => 'adjust',
-        'ref_no' => 'ADJ_' . $aid,
-        'date' => $ar['created_at'],
-        'created_at' => $ar['created_at'],
-        'user_name' => null,
-        'supplier_name' => null,
-        'customer_name' => null,
-        'item_count' => count($items),
-        'qty_total' => $qty_total,
-        'net_value' => 0.0,
-    ];
-
-    $uid = (int)$ar['user_id'];
-    if ($uid) {
-        $u = $pdo->prepare("SELECT name FROM users WHERE id = ? LIMIT 1");
-        $u->execute([$uid]);
-        $row['user_name'] = $u->fetchColumn() ?: null;
-    }
-
-    $rows[] = $row;
-
-    $itemsList = [];
-    foreach ($items as $it) {
-        $pid = isset($it['product_id']) ? (int)$it['product_id'] : 0;
-        $qty = isset($it['delta']) ? (float)$it['delta'] : 0;
-        $code = ''; $name = '';
-        if ($pid) {
-            $p = $pdo->prepare("SELECT code, name FROM products WHERE id = ? LIMIT 1");
-            $p->execute([$pid]);
-            $pr = $p->fetch(PDO::FETCH_ASSOC);
-            if ($pr) { $code = $pr['code']; $name = $pr['name']; }
-        }
-        $itemsList[] = [
-            'transaction_id' => $pseudoId,
-            'code' => $code,
-            'name' => $name,
-            'qty' => $qty,
-            'unit_price' => 0,
-            'discount_type' => null,
-            'discount_value' => null
-        ];
-    }
-    $itemsByTx[$pseudoId] = $itemsList;
-}
-
-usort($rows, function($a, $b){
-    $ta = strtotime($a['created_at'] ?? $a['date'] ?? '1970-01-01 00:00:00');
-    $tb = strtotime($b['created_at'] ?? $b['date'] ?? '1970-01-01 00:00:00');
-    return $tb <=> $ta;
-});
 
 
 /* helpers */
@@ -382,145 +238,251 @@ if ($type === 'adjust') {
 $currentUser = $_SESSION['user']['name'] ?? $_SESSION['user']['username'] ?? 'Admin';
 
 foreach ($rows as $t):
+
     $dtRaw  = $t['created_at'] ?: $t['date'];
     $dtDisp = $dtRaw ? date('Y-m-d H:i', strtotime($dtRaw)) : '';
 
-    $type = (string)($t['type'] ?? '');
+    $txType = (string)($t['type'] ?? '');
 
-    // partner / customer
-    if ($type === 'purchase') {
+    /* partner/customer/reason */
+    if ($txType === 'purchase') {
+
         $partner = $t['supplier_name'] ?? '— walk-in —';
-    } elseif ($type === 'sale') {
-        $partner = $t['customer_name'] ?? '— walk-in —';
-    } elseif ($type === 'refund') {
-        // refunds relate to customers: prefer recorded customer_name
-        $partner = $t['customer_name'] ?? '— walk-in —';
-    } elseif ($type === 'adjust') {
-        $partner = '— walk-in —';
-    } else {
-        $partner = '—';
-    }
 
-    // row class and badge
-    if ($type === 'purchase') {
+    } elseif ($txType === 'sale') {
+
+        $partner = $t['customer_name'] ?? '— walk-in —';
+
+    } elseif ($txType === 'refund') {
+
+        $partner = $t['customer_name'] ?? '— walk-in —';
+
+    } elseif ($txType === 'adjust') {
+
+    $partner = !empty(trim($t['notes'] ?? ''))
+        ? trim($t['notes'])
+        : (
+            !empty(trim($t['ref_no'] ?? ''))
+                ? trim($t['ref_no'])
+                : 'Stock adjusted'
+        );
+}
+
+    /* row colors + badges */
+    if ($txType === 'purchase') {
+
         $rowClass = 'table-success';
         $badge = '<span class="badge bg-success">IN</span>';
-    } elseif ($type === 'sale') {
+
+    } elseif ($txType === 'sale') {
+
         $rowClass = 'table-danger';
         $badge = '<span class="badge bg-danger">OUT</span>';
-    } elseif ($type === 'refund') {
+
+    } elseif ($txType === 'refund') {
+
         $rowClass = 'table-secondary';
         $badge = '<span class="badge bg-secondary text-light">REF</span>';
+
     } else {
+
         $rowClass = 'table-warning';
         $badge = '<span class="badge bg-warning text-dark">ADJ</span>';
     }
 
-    // By column: prefer recorded user_name, but for adjustments or missing names fall back to current user
+    /* user */
     $byName = $t['user_name'] ?? null;
-    if ($type === 'adjust' || $type === 'refund') {
+
+    if ($txType === 'adjust' || $txType === 'refund') {
+
         $by = $byName ? $byName : $currentUser;
+
     } else {
+
         $by = $byName ?? '—';
     }
 
-    // hide monetary net value for adjustments
-    $showValue = ($type !== 'adjust');
-    $txItems = $itemsByTx[$t['transaction_id']] ?? [];
+    $showValue = ($txType !== 'adjust');
+
+    $txId = $t['transaction_id'] ?? $t['id'] ?? null;
+
+    $txItems = $itemsByTx[$txId] ?? [];
 ?>
-  <tr class="<?= $rowClass ?>">
+
+<tr class="<?= $rowClass ?>">
+
     <td><?= h($dtDisp) ?></td>
-    <td><?= $badge ?> <span class="ms-1"><?= h(ucfirst($type)) ?></span></td>
+
+    <td>
+        <?= $badge ?>
+        <span class="ms-1"><?= h(ucfirst($txType)) ?></span>
+    </td>
+
     <td><?= h($t['ref_no']) ?></td>
-    <td><?= h($partner) ?></td>
-    <!--<td><?= h($by) ?></td>-->
-    <td class="text-end"><?= (int)$t['item_count'] ?></td>
-    <td class="text-end"><?= (int)$t['qty_total'] ?></td>
-    <td class="text-end"><?= $showValue ? '₱'.number_format((float)$t['net_value'], 2) : '—' ?></td>
-    <td class="text-end">
-  <?php if ($txItems): ?>
-    <button class="btn btn-sm btn-outline-secondary" type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#tx<?= h($t['transaction_id']) ?>">
-    View
-</button>
-  <?php endif; ?>
 
-  <?php if (($t['type'] ?? '') === 'sale'): ?>
+    <td>
 
-<a href="/deliveries/create.php?transaction_id=<?php echo (int)$t['transaction_id']; ?>"
-   class="btn btn-sm btn-outline-info ms-1">
-   Deliver
-</a>
+<?php if ($txType === 'adjust'): ?>
 
-<a href="refund.php?sale_id=<?= (int)$t['transaction_id'] ?>"
-   class="btn btn-sm btn-outline-danger ms-1"
-   onclick="return confirm('Refund this sale?')">
-Refund
-</a>
+    <?= h($t['notes'] ?: 'Stock adjusted') ?>
+
+<?php else: ?>
+
+    <?= h($partner) ?>
 
 <?php endif; ?>
+
 </td>
-<?php if ($t['type'] === 'sale'): ?>
+    <!--<td><?= h($by) ?></td>-->
 
+    <td class="text-end">
+        <?= (int)$t['item_count'] ?>
+    </td>
+
+    <td class="text-end">
+        <?= (int)$t['qty_total'] ?>
+    </td>
+
+    <td class="text-end">
+        <?= $showValue
+            ? '₱'.number_format((float)$t['net_value'], 2)
+            : '—' ?>
+    </td>
+
+    <td class="text-end">
+
+        <?php if ($txItems): ?>
+
+            <button
+                class="btn btn-sm btn-outline-secondary"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#tx<?= h($txId) ?>">
+                View
+            </button>
+
+        <?php endif; ?>
+
+        <?php if ($txType === 'sale'): ?>
+
+            <a href="/deliveries/create.php?transaction_id=<?php echo (int)$t['transaction_id']; ?>"
+               class="btn btn-sm btn-outline-info ms-1">
+               Deliver
+            </a>
+
+            <a href="refund.php?sale_id=<?= (int)$t['transaction_id'] ?>"
+               class="btn btn-sm btn-outline-danger ms-1"
+               onclick="return confirm('Refund this sale?')">
+               Refund
+            </a>
+
+        <?php endif; ?>
+
+    </td>
+
+</tr>
+
+<?php if ($txItems): ?>
+
+<tr class="collapse" id="tx<?= h($txId) ?>">
+
+    <td colspan="9" class="p-0">
+
+        <table class="table table-sm mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th style="width:18%">Code</th>
+
+                    <th>Item</th>
+
+                    <th class="text-end" style="width:10%">Qty</th>
+
+                    <?php if ($txType !== 'adjust'): ?>
+
+                        <th class="text-end" style="width:12%">Unit</th>
+
+                        <th class="text-end" style="width:12%">Discount</th>
+
+                        <th class="text-end" style="width:12%">Line Total</th>
+
+                    <?php endif; ?>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            <?php foreach ($txItems as $li): ?>
+
+                <?php
+                $discLabel = '';
+
+                if (($li['discount_type'] ?? '') === 'percent'
+                    && ($li['discount_value'] ?? '') !== '') {
+
+                    $discLabel =
+                        number_format((float)$li['discount_value'],2).' %';
+
+                } elseif (($li['discount_type'] ?? '') === 'amount'
+                    && ($li['discount_value'] ?? '') !== '') {
+
+                    $discLabel =
+                        '₱'.number_format((float)$li['discount_value'],2);
+                }
+
+                $ln = line_net_php(
+                    (int)$li['qty'],
+                    (float)$li['unit_price'],
+                    $li['discount_type'] ?? null,
+                    $li['discount_value'] ?? null
+                );
+                ?>
+
+                <tr>
+
+                    <td><?= h($li['code']) ?></td>
+
+                    <td><?= h($li['name']) ?></td>
+
+                    <td class="text-end">
+                        <?= (int)$li['qty'] ?>
+                    </td>
+
+                    <?php if ($txType !== 'adjust'): ?>
+
+                        <td class="text-end">
+                            <?= $li['unit_price']
+                                ? '₱'.number_format((float)$li['unit_price'], 2)
+                                : '—' ?>
+                        </td>
+
+                        <td class="text-end">
+                            <?= $discLabel ?: '—' ?>
+                        </td>
+
+                        <td class="text-end">
+                            ₱<?= number_format($ln, 2) ?>
+                        </td>
+
+                    <?php endif; ?>
+
+                </tr>
+
+            <?php endforeach; ?>
+
+            </tbody>
+
+        </table>
+
+    </td>
+
+</tr>
 
 <?php endif; ?>
-  </tr>
-
-  <?php if ($txItems): ?>
-    <tr class="collapse" id="tx<?= h($t['transaction_id']) ?>">
-      <td colspan="9" class="p-0">
-        <table class="table table-sm mb-0">
-          <thead>
-            <?php if ($type === 'adjust'): ?>
-              <tr>
-                <th style="width:18%">Code</th>
-                <th>Item</th>
-                <th class="text-end" style="width:10%">Qty</th>
-              </tr>
-            <?php else: ?>
-              <tr>
-                <th style="width:18%">Code</th>
-                <th>Item</th>
-                <th class="text-end" style="width:10%">Qty</th>
-                <th class="text-end" style="width:12%">Unit</th>
-                <th class="text-end" style="width:12%">Discount</th>
-                <th class="text-end" style="width:12%">Line Total</th>
-              </tr>
-            <?php endif; ?>
-          </thead>
-          <tbody>
-            <?php foreach ($txItems as $li): ?>
-              <?php if ($type === 'adjust'): ?>
-                <tr>
-                  <td><?= h($li['code']) ?></td>
-                  <td><?= h($li['name']) ?></td>
-                  <td class="text-end"><?= (int)$li['qty'] ?></td>
-                </tr>
-              <?php else:
-                $discLabel = '';
-                if (($li['discount_type'] ?? '') === 'percent' && ($li['discount_value'] ?? '') !== '') {
-                  $discLabel = number_format((float)$li['discount_value'],2).' %';
-                } elseif (($li['discount_type'] ?? '') === 'amount' && ($li['discount_value'] ?? '') !== '') {
-                  $discLabel = '₱'.number_format((float)$li['discount_value'],2);
-                }
-                $ln = line_net_php((int)$li['qty'], (float)$li['unit_price'], $li['discount_type'] ?? null, $li['discount_value'] ?? null);
-              ?>
-                <tr>
-                  <td><?= h($li['code']) ?></td>
-                  <td><?= h($li['name']) ?></td>
-                  <td class="text-end"><?= (int)$li['qty'] ?></td>
-                  <td class="text-end"><?= $li['unit_price'] ? '₱'.number_format((float)$li['unit_price'], 2) : '—' ?></td>
-                  <td class="text-end"><?= $discLabel ?: '—' ?></td>
-                  <td class="text-end">₱<?= number_format($ln, 2) ?></td>
-                </tr>
-              <?php endif; ?>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-      </td>
-    </tr>
-  <?php endif; ?>
 
 <?php endforeach; ?>
 
