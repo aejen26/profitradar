@@ -587,3 +587,85 @@ Setup → Add Products → Record Purchases → Manage Inventory → Process Sal
 ```
 
 ---
+# ⚙️ Installation & Setup Guide
+
+## Requirements
+
+Before running the system, install:
+
+- PHP 8+
+- MySQL / MariaDB
+- XAMPP / WAMP / Laragon
+- Web Browser
+
+---
+
+## 1. Clone or Download the Project
+
+```bash
+git clone https://github.com/yourusername/profitradar.git
+```
+
+Or download the ZIP file and extract it into your server folder.
+
+Example for XAMPP:
+
+```text
+htdocs/profitradar
+```
+
+---
+
+## 2. Import the Database
+
+1. Open phpMyAdmin
+2. Create a database
+
+Example:
+
+```text
+profitradar
+```
+
+3. Import the provided `.sql` file into the database
+
+---
+
+## 3. Configure Database Connection
+
+Open:
+
+```text
+/includes/db.php
+```
+
+Update your database credentials:
+
+```php
+$host = "localhost";
+$dbname = "profitradar";
+$username = "root";
+$password = "";
+```
+
+---
+
+## 4. Start Apache and MySQL
+
+If using XAMPP:
+- Start Apache
+- Start MySQL
+
+---
+
+## 5. Run the System
+
+Open your browser:
+
+```text
+http://localhost/profitradar
+```
+
+---
+A-P - "admin@example.com" - "admin123"
+U-P - "user@example.com" - "user123"
