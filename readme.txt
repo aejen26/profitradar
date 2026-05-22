@@ -6,7 +6,6 @@ It simplifies daily operations and provides insights to support better decision-
 
 
 Features
-
 - Product & Category Management  
 - Supplier & Supplier Location Management  
 - Inventory Tracking with Batch & Expiry Monitoring  
@@ -20,7 +19,6 @@ Features
 
 
 System Workflow
-
 1. Initial Setup
 - Create users (Admin/Staff/Auditor)
 - Configure system settings (e.g., low stock threshold)
@@ -48,9 +46,7 @@ System Workflow
   - Record damaged items  
   - Reserve items for customers  
 
----
-
-### 4. Sales Process (POS)
+4. Sales Process (POS)
 - Select products and quantities
 - Apply discounts if needed
 - Complete the transaction
@@ -86,16 +82,13 @@ System Flow
 Setup → Add Products → Purchase Stock → Manage Inventory → Sell Products → Monitor → Analyze → Improve
 
 
-
 User Roles
-
 Admin – Full access to all features  
 Staff – Daily operations (sales, inventory, purchases)  
 Auditor – View-only access to reports and logs  
 
 
 Purpose
-
 This system helps businesses:
 - Track inventory accurately  
 - Prevent stock shortages and expiry losses  
@@ -104,7 +97,6 @@ This system helps businesses:
 
 
 Tech Stack
-
 - PHP  
 - MySQL  
 - Bootstrap (UI)  
@@ -123,7 +115,6 @@ Notes
 
 
 2. Initial Setup
-
 Add Categories
 Go to:
 ```text
@@ -169,7 +160,6 @@ Add:
 - Stock quantity
 
 3. Record Purchases
-
 Go to:
 ```text
 Purchases
@@ -183,7 +173,6 @@ The system automatically:
 - Records transactions
 
 4. Manage Inventory
-
 Go to:
 ```text
 Inventory
@@ -198,7 +187,6 @@ Monitor:
 
 
 5. Process Sales
-
 Go to:
 ```text
 POS / Sales
@@ -218,7 +206,6 @@ The system automatically:
 
 
 6. Reservations
-
 Go to:
 ```text
 Reservations
@@ -228,7 +215,6 @@ Reserve products for customers before payment.
 
 
 7. Stock Adjustments
-
 Go to:
 ```text
 Stock Adjustment
@@ -241,7 +227,6 @@ Use this to:
 
 
 8. Damaged Products
-
 Go to:
 ```text
 Damaged
@@ -251,7 +236,6 @@ Record damaged or spoiled products to remove them from inventory.
 
 
 9. Monitor Alerts
-
 Low Stock Alerts
 Go to:
 ```text
@@ -271,7 +255,6 @@ Track:
 - Products expiring soon
 
 10. Reports & Analytics
-
 The system includes:
 
 - Dashboard
@@ -291,7 +274,6 @@ These help monitor:
 - Business growth
 
 11. User Management
-
 Go to:
 ```text
 Users
@@ -304,7 +286,6 @@ Admin users can:
 - Enable or disable accounts
 
 12. Audit Logs
-
 Go to:
 ```text
 Audit Logs
@@ -314,19 +295,16 @@ Track all system activities and user actions.
 
 
 System Workflow
-
 Setup → Add Products → Record Purchases → Manage Inventory → Process Sales → Monitor Reports → Analyze Business
 
 
 How to Use the System
-
 1. Login
 - Open the system in your browser
 - Enter your username and password
 - Login using your assigned role
 
 2. Initial Setup
-
 Add Categories
 Go to:
 ```text
@@ -370,7 +348,6 @@ Add:
 - Stock quantity
 
 3. Record Purchases
-
 Go to:
 ```text
 Purchases
@@ -384,7 +361,6 @@ The system automatically:
 - Records transactions
 
 4. Manage Inventory
-
 Go to:
 ```text
 Inventory
@@ -398,7 +374,6 @@ Monitor:
 - Batch information
 
 5. Process Sales
-
 Go to:
 ```text
 POS / Sales
@@ -417,7 +392,6 @@ The system automatically:
 - Updates reports
 
 6. Reservations
-
 Go to:
 ```text
 Reservations
@@ -426,7 +400,6 @@ Reservations
 Reserve products for customers before payment.
 
 7. Stock Adjustments
-
 Go to:
 ```text
 Stock Adjustment
@@ -439,7 +412,6 @@ Use this to:
 
 
 8. Damaged Products
-
 Go to:
 ```text
 Damaged
@@ -448,7 +420,6 @@ Damaged
 Record damaged or spoiled products to remove them from inventory.
 
 9. Monitor Alerts
-
 Low Stock Alerts
 Go to:
 ```text
@@ -468,7 +439,6 @@ Track:
 - Products expiring soon
 
 10. Reports & Analytics
-
 The system includes:
 
 - Dashboard
@@ -488,7 +458,6 @@ These help monitor:
 - Business growth
 
 11. User Management
-
 Go to:
 ```text
 Users
@@ -501,7 +470,6 @@ Admin users can:
 - Enable or disable accounts
 
 12. Audit Logs
-
 Go to:
 ```text
 Audit Logs
@@ -510,34 +478,26 @@ Audit Logs
 Track all system activities and user actions.
 
 System Workflow
-
 Setup → Add Products → Record Purchases → Manage Inventory → Process Sales → Monitor Reports → Analyze Business
 
 Installation & Setup Guide
 
 Requirements
-
 Before running the system, install:
-
 - PHP 8+
 - MySQL / MariaDB
 - XAMPP / WAMP / Laragon
 - Web Browser
 
 1. Clone or Download the Project
-
 ```bash
 git clone https://github.com/yourusername/profitradar.git
 ```
-
 Or download the ZIP file and extract it into your server folder.
-
 Example for XAMPP:
-
 ```text
 htdocs/profitradar
 ```
-
 2. Import the Database
 
 1. Open phpMyAdmin
@@ -554,13 +514,11 @@ profitradar
 3. Configure Database Connection
 
 Open:
-
 ```text
 /includes/db.php
 ```
 
 Update your database credentials:
-
 ```php
 $host = "localhost";
 $dbname = "profitradar";
@@ -569,13 +527,11 @@ $password = "";
 ```
 
 4. Start Apache and MySQL
-
 If using XAMPP:
 - Start Apache
 - Start MySQL
 
 5. Run the System
-
 Open your browser:
 
 ```text
