@@ -1,12 +1,11 @@
-# Inventory Management System
+ Inventory Management System
 
-## Overview
+ Overview
 This system is designed to help small businesses manage their **products, inventory, sales, and reports** in one place.  
 It simplifies daily operations and provides insights to support better decision-making.
 
----
 
-## Features
+Features
 
 - Product & Category Management  
 - Supplier & Supplier Location Management  
@@ -19,11 +18,10 @@ It simplifies daily operations and provides insights to support better decision-
 - User Management with Roles (Admin, Staff, Auditor)  
 - Audit Logs for activity tracking  
 
----
 
-##  System Workflow
+System Workflow
 
-### 1. Initial Setup
+1. Initial Setup
 - Create users (Admin/Staff/Auditor)
 - Configure system settings (e.g., low stock threshold)
 - Add:
@@ -32,16 +30,14 @@ It simplifies daily operations and provides insights to support better decision-
   - Supplier Locations  
   - Products  
 
----
 
-### 2. Stock Entry (Purchasing)
+2. Stock Entry (Purchasing)
 - Create a **Purchase Order** (optional)
 - Record **Purchases** once items are received
 - System automatically updates inventory
 
----
 
-### 3. Inventory Management
+3. Inventory Management
 - View all products and stock levels
 - Track:
   - Available stock  
@@ -62,49 +58,43 @@ It simplifies daily operations and provides insights to support better decision-
   - Deducts stock  
   - Records the sale  
 
----
 
-### 5. Monitoring
+5. Monitoring
 - **Dashboard** → quick business overview  
 - **Low Stock Alerts** → identify items to restock  
 - **Expiry Monitoring** → prevent selling expired items  
 - **Deliveries** → track customer orders  
 
----
 
-### 6. Tracking & Logs
+6. Tracking & Logs
 - **Transactions** → all system activities  
 - **Inventory Movements** → stock changes history  
 - **Stock Movement Report** → detailed stock flow  
 - **Audit Logs** → user actions and system history  
 
----
 
-### 7. Reports & Analytics
-- **Sales Report** → revenue, profit, trends  
-- **Income Report** → financial performance  
-- **Purchases Report** → inventory expenses  
-- **Inventory Report** → stock value and health  
-- **Analytics Dashboard** → advanced insights  
-- **Forecasting** → predict demand and restocking needs  
+7. Reports & Analytics
+- Sales Report → revenue, profit, trends  
+- Income Report → financial performance  
+- Purchases Report → inventory expenses  
+- Inventory Report → stock value and health  
+- Analytics Dashboard → advanced insights  
+- Forecasting → predict demand and restocking needs  
 
----
 
-## System Flow (Simplified)
+System Flow 
 Setup → Add Products → Purchase Stock → Manage Inventory → Sell Products → Monitor → Analyze → Improve
 
 
----
 
-## 👥 User Roles
+User Roles
 
-- **Admin** – Full access to all features  
-- **Staff** – Daily operations (sales, inventory, purchases)  
-- **Auditor** – View-only access to reports and logs  
+Admin – Full access to all features  
+Staff – Daily operations (sales, inventory, purchases)  
+Auditor – View-only access to reports and logs  
 
----
 
-##  Purpose
+Purpose
 
 This system helps businesses:
 - Track inventory accurately  
@@ -112,34 +102,29 @@ This system helps businesses:
 - Monitor sales and expenses  
 - Make data-driven decisions  
 
----
 
-## 🛠 Tech Stack
+Tech Stack
 
 - PHP  
 - MySQL  
 - Bootstrap (UI)  
 - JavaScript (Charts & Interactions)  
 
----
 
-##  Notes
+Notes
+- Designed for **small business use
+- Focused on **simplicity and usability
+- Supports **basic analytics and forecasting
 
-- Designed for **small business use**
-- Focused on **simplicity and usability**
-- Supports **basic analytics and forecasting**
-
----
-## 1. Login
+1. Login
 - Open the system in your browser
 - Enter your username and password
 - Login using your assigned role
 
----
 
-# 2. Initial Setup
+2. Initial Setup
 
-## Add Categories
+Add Categories
 Go to:
 ```text
 Categories
@@ -150,9 +135,7 @@ Create product categories such as:
 - Snacks
 - Grocery
 
----
-
-## Add Suppliers
+Add Suppliers
 Go to:
 ```text
 Suppliers
@@ -160,9 +143,8 @@ Suppliers
 
 Add supplier information and contact details.
 
----
 
-## Add Supplier Locations
+Add Supplier Locations
 Go to:
 ```text
 Supplier Locations
@@ -170,9 +152,8 @@ Supplier Locations
 
 Save supplier addresses or locations.
 
----
 
-## Add Products
+Add Products
 Go to:
 ```text
 Products
@@ -187,9 +168,7 @@ Add:
 - Selling price
 - Stock quantity
 
----
-
-# 3. Record Purchases
+3. Record Purchases
 
 Go to:
 ```text
@@ -203,9 +182,7 @@ The system automatically:
 - Updates inventory
 - Records transactions
 
----
-
-# 4. Manage Inventory
+4. Manage Inventory
 
 Go to:
 ```text
@@ -219,9 +196,8 @@ Monitor:
 - Expiry dates
 - Batch information
 
----
 
-# 5. Process Sales
+5. Process Sales
 
 Go to:
 ```text
@@ -240,9 +216,8 @@ The system automatically:
 - Saves transaction history
 - Updates reports
 
----
 
-# 6. Reservations
+6. Reservations
 
 Go to:
 ```text
@@ -251,9 +226,8 @@ Reservations
 
 Reserve products for customers before payment.
 
----
 
-# 7. Stock Adjustments
+7. Stock Adjustments
 
 Go to:
 ```text
@@ -265,9 +239,8 @@ Use this to:
 - Add missing stock
 - Remove incorrect quantities
 
----
 
-# 8. Damaged Products
+8. Damaged Products
 
 Go to:
 ```text
@@ -276,11 +249,10 @@ Damaged
 
 Record damaged or spoiled products to remove them from inventory.
 
----
 
-# 9. Monitor Alerts
+9. Monitor Alerts
 
-## Low Stock Alerts
+Low Stock Alerts
 Go to:
 ```text
 Low Stock Alerts
@@ -288,9 +260,7 @@ Low Stock Alerts
 
 View products that need restocking.
 
----
-
-## Expiry Monitoring
+Expiry Monitoring
 Go to:
 ```text
 Expiry Monitoring
@@ -300,9 +270,7 @@ Track:
 - Expired products
 - Products expiring soon
 
----
-
-# 10. Reports & Analytics
+10. Reports & Analytics
 
 The system includes:
 
@@ -322,9 +290,7 @@ These help monitor:
 - Product demand
 - Business growth
 
----
-
-# 11. User Management
+11. User Management
 
 Go to:
 ```text
@@ -337,9 +303,7 @@ Admin users can:
 - Assign roles
 - Enable or disable accounts
 
----
-
-# 12. Audit Logs
+12. Audit Logs
 
 Go to:
 ```text
@@ -348,28 +312,22 @@ Audit Logs
 
 Track all system activities and user actions.
 
----
 
-#  System Workflow
+System Workflow
 
-```text
 Setup → Add Products → Record Purchases → Manage Inventory → Process Sales → Monitor Reports → Analyze Business
-```
 
----
 
-# How to Use the System
+How to Use the System
 
-## 1. Login
+1. Login
 - Open the system in your browser
 - Enter your username and password
 - Login using your assigned role
 
----
+2. Initial Setup
 
-# 2. Initial Setup
-
-## Add Categories
+Add Categories
 Go to:
 ```text
 Categories
@@ -380,9 +338,7 @@ Create product categories such as:
 - Snacks
 - Grocery
 
----
-
-## Add Suppliers
+Add Suppliers
 Go to:
 ```text
 Suppliers
@@ -390,9 +346,7 @@ Suppliers
 
 Add supplier information and contact details.
 
----
-
-## Add Supplier Locations
+Add Supplier Locations
 Go to:
 ```text
 Supplier Locations
@@ -400,9 +354,7 @@ Supplier Locations
 
 Save supplier addresses or locations.
 
----
-
-## Add Products
+Add Products
 Go to:
 ```text
 Products
@@ -417,9 +369,7 @@ Add:
 - Selling price
 - Stock quantity
 
----
-
-# 3. Record Purchases
+3. Record Purchases
 
 Go to:
 ```text
@@ -433,9 +383,7 @@ The system automatically:
 - Updates inventory
 - Records transactions
 
----
-
-# 4. Manage Inventory
+4. Manage Inventory
 
 Go to:
 ```text
@@ -449,9 +397,7 @@ Monitor:
 - Expiry dates
 - Batch information
 
----
-
-# 5. Process Sales
+5. Process Sales
 
 Go to:
 ```text
@@ -470,9 +416,7 @@ The system automatically:
 - Saves transaction history
 - Updates reports
 
----
-
-# 6. Reservations
+6. Reservations
 
 Go to:
 ```text
@@ -481,9 +425,7 @@ Reservations
 
 Reserve products for customers before payment.
 
----
-
-# 7. Stock Adjustments
+7. Stock Adjustments
 
 Go to:
 ```text
@@ -495,9 +437,8 @@ Use this to:
 - Add missing stock
 - Remove incorrect quantities
 
----
 
-# 8. Damaged Products
+8. Damaged Products
 
 Go to:
 ```text
@@ -506,11 +447,9 @@ Damaged
 
 Record damaged or spoiled products to remove them from inventory.
 
----
+9. Monitor Alerts
 
-# 9. Monitor Alerts
-
-## Low Stock Alerts
+Low Stock Alerts
 Go to:
 ```text
 Low Stock Alerts
@@ -518,9 +457,7 @@ Low Stock Alerts
 
 View products that need restocking.
 
----
-
-## Expiry Monitoring
+Expiry Monitoring
 Go to:
 ```text
 Expiry Monitoring
@@ -530,9 +467,7 @@ Track:
 - Expired products
 - Products expiring soon
 
----
-
-# 10. Reports & Analytics
+10. Reports & Analytics
 
 The system includes:
 
@@ -552,14 +487,12 @@ These help monitor:
 - Product demand
 - Business growth
 
----
-
-# 11. User Management
+11. User Management
 
 Go to:
 ```text
 Users
-```
+
 
 Admin users can:
 - Add users
@@ -567,9 +500,7 @@ Admin users can:
 - Assign roles
 - Enable or disable accounts
 
----
-
-# 12. Audit Logs
+12. Audit Logs
 
 Go to:
 ```text
@@ -578,18 +509,13 @@ Audit Logs
 
 Track all system activities and user actions.
 
----
+System Workflow
 
-# System Workflow
-
-```text
 Setup → Add Products → Record Purchases → Manage Inventory → Process Sales → Monitor Reports → Analyze Business
-```
 
----
-# ⚙️ Installation & Setup Guide
+Installation & Setup Guide
 
-## Requirements
+Requirements
 
 Before running the system, install:
 
@@ -598,9 +524,7 @@ Before running the system, install:
 - XAMPP / WAMP / Laragon
 - Web Browser
 
----
-
-## 1. Clone or Download the Project
+1. Clone or Download the Project
 
 ```bash
 git clone https://github.com/yourusername/profitradar.git
@@ -614,9 +538,7 @@ Example for XAMPP:
 htdocs/profitradar
 ```
 
----
-
-## 2. Import the Database
+2. Import the Database
 
 1. Open phpMyAdmin
 2. Create a database
@@ -629,9 +551,7 @@ profitradar
 
 3. Import the provided `.sql` file into the database
 
----
-
-## 3. Configure Database Connection
+3. Configure Database Connection
 
 Open:
 
@@ -648,24 +568,19 @@ $username = "root";
 $password = "";
 ```
 
----
-
-## 4. Start Apache and MySQL
+4. Start Apache and MySQL
 
 If using XAMPP:
 - Start Apache
 - Start MySQL
 
----
-
-## 5. Run the System
+5. Run the System
 
 Open your browser:
 
 ```text
 http://localhost/profitradar
 ```
-
 ---
 A-P - "admin@example.com" - "admin123"
 U-P - "user@example.com" - "user123"
