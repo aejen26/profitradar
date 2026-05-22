@@ -1,6 +1,6 @@
- Inventory Management System
+Inventory Management System
 
- Overview
+Overview
 This system is designed to help small businesses manage their **products, inventory, sales, and reports** in one place.  
 It simplifies daily operations and provides insights to support better decision-making.
 
