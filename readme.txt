@@ -540,3 +540,5 @@ http://localhost/profitradar
 ---
 A-P - "admin@example.com" - "admin123"
 U-P - "user@example.com" - "user123"
+
+https://profitradar.infinityfreeapp.com
