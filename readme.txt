@@ -1,4 +1,4 @@
-Inventory Management System
+Profitradar Inventory Management System
 
 Overview
 This system is designed to help small businesses manage their **products, inventory, sales, and reports** in one place.  
