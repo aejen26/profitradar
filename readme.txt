@@ -293,10 +293,8 @@ Audit Logs
 
 Track all system activities and user actions.
 
-
 System Workflow
 Setup → Add Products → Record Purchases → Manage Inventory → Process Sales → Monitor Reports → Analyze Business
-
 
 How to Use the System
 1. Login
