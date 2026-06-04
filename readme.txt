@@ -56,17 +56,17 @@ System Workflow
 
 
 5. Monitoring
-- **Dashboard** → quick business overview  
-- **Low Stock Alerts** → identify items to restock  
-- **Expiry Monitoring** → prevent selling expired items  
-- **Deliveries** → track customer orders  
+- Dashboard → quick business overview  
+- Low Stock Alerts → identify items to restock  
+- Expiry Monitoring** → prevent selling expired items  
+- Deliveries → track customer orders  
 
 
 6. Tracking & Logs
-- **Transactions** → all system activities  
-- **Inventory Movements** → stock changes history  
-- **Stock Movement Report** → detailed stock flow  
-- **Audit Logs** → user actions and system history  
+- Transactions → all system activities  
+- Inventory Movements → stock changes history  
+- Stock Movement Report → detailed stock flow  
+- Audit Logs → user actions and system history  
 
 
 7. Reports & Analytics
